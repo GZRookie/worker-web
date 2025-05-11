@@ -68,7 +68,24 @@
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-        />
+        >
+          <template #total>
+            共计 {{ total }} 条
+          </template>
+          <template #sizes>
+            {{ pageSize }}/页
+          </template>
+          <template #jumper>
+            跳转至
+            <el-input
+              class="el-pagination__jump"
+              size="small"
+              :model-value="currentPage"
+              @change="handleCurrentChange"
+            />
+            页
+          </template>
+        </el-pagination>
       </div>
   
       <!-- 用户表单弹窗 -->

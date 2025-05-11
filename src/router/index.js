@@ -4,11 +4,6 @@ import Layout from '@/layout/index.vue'
 // 公共路由
 const publicRoutes = [
   {
-    path: '/login',
-    component: () => import('@/views/login/index.vue'),
-    hidden: true
-  },
-  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -17,9 +12,14 @@ const publicRoutes = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index.vue'),
         name: 'Dashboard',
-        meta: { title: '仪表盘', icon: 'el-icon-s-home' }
+        meta: { title: '首页', icon: 'el-icon-s-home' }
       }
     ]
+  },
+  {
+    path: '/login',
+    component: () => import('@/views/login/index.vue'),
+    hidden: true
   },
   {
     path: '/user',
@@ -38,22 +38,6 @@ const publicRoutes = [
     ]
   },
   {
-    path: '/worker',
-    component: Layout,
-    redirect: '/worker/list',
-    name: 'worker',
-    meta: { title: '工人管理', icon: 'el-icon-user' },
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/worker/index.vue'),
-        name: 'list',
-        meta: { title: '工人管理', icon: 'el-icon-user' }
-      }
-   
-    ]
-  },
-  {
     path: '/role',
     component: Layout,
     redirect: '/role/list',
@@ -65,6 +49,22 @@ const publicRoutes = [
         component: () => import('@/views/role/index.vue'),
         name: 'list',
         meta: { title: '角色管理', icon: 'el-icon-user' }
+      }
+   
+    ]
+  },
+  {
+    path: '/worker',
+    component: Layout,
+    redirect: '/worker/list',
+    name: 'worker',
+    meta: { title: '工人管理', icon: 'el-icon-user' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/worker/index.vue'),
+        name: 'list',
+        meta: { title: '工人管理', icon: 'el-icon-user' }
       }
    
     ]
@@ -87,6 +87,21 @@ const publicRoutes = [
         component: () => import('@/views/finance/salary.vue'),
         name: 'Salary',
         meta: { title: '工资记录' }
+      }
+    ]
+  },
+  {
+    path: '/attendance',
+    component: Layout,
+    redirect: '/attendance/record',
+    name: 'Attendance',
+    meta: { title: '考勤管理', icon: 'el-icon-user' },
+    children: [
+      {
+        path: 'record',
+        component: () => import('@/views/attendance/record.vue'),
+        name: 'AttendanceRecord',
+        meta: { title: '考勤记录', icon: 'el-icon-user' }
       }
     ]
   }

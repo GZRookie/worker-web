@@ -2,14 +2,14 @@
   <div class="wage-container">
     <!-- 工种薪资列表 -->
     <el-table :data="wageList" style="width: 100%" v-loading="loading" border>
-      <el-table-column prop="roleId" label="工种ID" min-width="100" />
-      <el-table-column prop="roleName" label="工种名称" min-width="200" />
-      <el-table-column prop="dailyWage" label="日薪(元)" min-width="150">
+      <el-table-column prop="num" label="序号" min-width="100" align="center" />
+      <el-table-column prop="roleName" label="工种名称" min-width="200" align="center" />
+      <el-table-column prop="dailyWage" label="日薪(元)" min-width="150" align="center">
         <template #default="scope">
           {{ scope.row.dailyWage.toFixed(2) }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="120" fixed="right">
+      <el-table-column label="操作" min-width="120" fixed="right" align="center">
         <template #default="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
         </template>
@@ -29,8 +29,11 @@
         :rules="rules"
         label-width="100px"
       >
-        <el-form-item label="工种名称" prop="roleName">
+        <el-form-item label="工种名称" v-if="!wageForm.roleId">
           <el-input v-model="wageForm.roleName" placeholder="请输入工种名称" />
+        </el-form-item>
+        <el-form-item label="工种名称" v-else>
+          <span>{{ wageForm.roleName }}</span>
         </el-form-item>
         <el-form-item label="日薪(元)" prop="dailyWage">
           <el-input-number v-model="wageForm.dailyWage" :precision="2" :step="10" :min="0" />
@@ -69,10 +72,6 @@ export default {
     
     // 表单验证规则
     const rules = reactive({
-      roleName: [
-        { required: true, message: '请输入工种名称', trigger: 'blur' },
-        { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
-      ],
       dailyWage: [
         { required: true, message: '请输入日薪', trigger: 'blur' }
       ]
@@ -112,8 +111,9 @@ export default {
       wageFormRef.value.validate(valid => {
         if (valid) {
           const isEdit = wageForm.roleId !== null
-          const method = isEdit ? 'put' : 'post'
-          const url = isEdit ? `/salary/wage/${wageForm.roleId}` : '/salary/wage'
+          const method = 'post'
+          // 修改编辑请求的URL为/salary/wage/edit
+          const url = isEdit ? '/salary/wage/edit' : '/salary/wage'
           
           service[method](url, wageForm)
             .then(res => {
