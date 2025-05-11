@@ -298,21 +298,7 @@ export default {
           await service.post('/admin/user/add', userForm)
           ElMessage.success('成功')
           dialogVisible.value = false
-          
-          // try {
-          //   if (userForm.id) {
-          //     await service.post(`/admin/user/update_user`, userForm)
-          //     ElMessage.success('更新成功')
-          //   } else {
-          //     await service.post('/admin/user', userForm)
-          //     ElMessage.success('添加成功')
-          //   }
-          //   dialogVisible.value = false
-          //   getUserList()
-          // } catch (error) {
-          //   console.error('保存用户失败:', error)
-          //   ElMessage.error('保存失败')
-          // }
+      
         }
       })
     }

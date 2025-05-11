@@ -65,16 +65,11 @@
           v-model:page-size="pageSize"
           :page-sizes="[10, 20, 50, 100]"
           :total="total"
-          layout="共 {total} 条, sizes, prev, pager, next, jumper"
+          layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         >
-          <template #total>
-            共计 {{ total }} 条
-          </template>
-          <template #sizes>
-            {{ pageSize }}/页
-          </template>
+          
           <template #jumper>
             跳转至
             <el-input
