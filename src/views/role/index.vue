@@ -31,7 +31,7 @@
   
       <!-- 用户列表 -->
       <el-table :data="userList" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="num" label="序号" width="80" />
         <!-- <el-table-column prop="phoneNum" label="角色" width="250"  />
         <el-table-column prop="realName" label="名称" width="250" /> -->
         <el-table-column prop="roleName" label="角色" width="250"  />
