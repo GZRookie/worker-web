@@ -38,22 +38,7 @@ const publicRoutes = [
     ]
   },
   {
-    path: '/role',
-    component: Layout,
-    redirect: '/role/list',
-    name: 'role',
-    meta: { title: '角色管理', icon: 'el-icon-user' },
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/role/index.vue'),
-        name: 'list',
-        meta: { title: '角色管理', icon: 'el-icon-user' }
-      }
-   
-    ]
-  },
-  {
+
     path: '/worker',
     component: Layout,
     redirect: '/worker/list',
@@ -63,12 +48,29 @@ const publicRoutes = [
       {
         path: 'list',
         component: () => import('@/views/worker/index.vue'),
-        name: 'list',
+        name: 'wokerList',
         meta: { title: '工人管理', icon: 'el-icon-user' }
       }
    
     ]
   },
+  {
+    path: '/role',
+    component: Layout,
+    redirect: '/role/list',
+    name: 'role',
+    meta: { title: '角色管理', icon: 'el-icon-user' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/role/index.vue'),
+        name: 'roleList',
+        meta: { title: '角色管理', icon: 'el-icon-user' }
+      }
+   
+    ]
+  },
+
   {
     path: '/finance',
     component: Layout,
