@@ -108,10 +108,18 @@ export default {
           // 去查询权限
           
           service.get('/admin/user/permission').then(res=>{
-            console.log('permission', res.data)
+            console.log('--userpermission', res.data)
+            // 保存权限信息到本地存储
+            if (res.code === 2000 && res.data && res.data.permissionList) {
+              localStorage.setItem('userPermissions', JSON.stringify(res.data.permissionList))
+            }
+            // 跳转到首页
+            router.push('/')
+          }).catch(err => {
+            console.error('获取权限失败:', err)
+            // 权限获取失败也跳转到首页，但可能会受限
+            router.push('/')
           });
-          console.log('puuuu')
-          router.push('/')
 
           
         }).catch(err => {

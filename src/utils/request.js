@@ -28,25 +28,31 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
+    if(response.config.url.includes('/export/template')){
+      return response;
+    }
     const res = response.data
-    
+    console.log(res)
+    // 401: 未登录或token过期
+    if (res.code === 4001) {
+      // 清除token
+      localStorage.removeItem('tokenValue')
+      localStorage.removeItem('adminUserId')
+      // 跳转到登录页
+      router.push('/login')
+    }
     
     // 如果返回的状态码不是200，说明接口请求有误
-    if (res.code !== 2000) {
+    if (res.code !== 2000 && res.code != 200) {
+      
       ElMessage({
-        message: res.msg || '请求失败',
+        message: res.message || '请求失败',
         type: 'error',
         duration: 5 * 1000
       })
+      return res;
       
-      // 401: 未登录或token过期
-      if (res.code === 4001) {
-        // 清除token
-        localStorage.removeItem('tokenValue')
-        localStorage.removeItem('adminUserId')
-        // 跳转到登录页
-        router.push('/login')
-      }
+      
       
       return Promise.reject(res.msg || '请求失败')
     } else {

@@ -19,10 +19,7 @@
             <el-button @click="resetSearch">重置</el-button>
           </el-form-item>
   
-          <!-- <el-form-item>
-            <el-button type="primary" @click="handleSearch" style="float: right">新增</el-button>
-          
-          </el-form-item> -->
+        
         </el-form>
         <div class="operation-buttons">
           <el-button type="primary" @click="handleAdd">新增角色</el-button>
@@ -32,16 +29,8 @@
       <!-- 用户列表 -->
       <el-table :data="userList" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
-        <!-- <el-table-column prop="phoneNum" label="角色" width="250"  />
-        <el-table-column prop="realName" label="名称" width="250" /> -->
         <el-table-column prop="roleName" label="角色" width="250"  />
-        <!-- <el-table-column label="角色" width="100">
-          <template #default="scope">
-            <el-tag :type="scope.row.type === 1 ? 'success' : 'info'">
-              {{ scope.row.type === 1 ? '管理员' : '普通用户' }}
-            </el-tag>
-          </template>
-        </el-table-column> -->
+      
         <el-table-column prop="status" label="状态" width="400">
           <template #default="scope">
             <el-tag :type="scope.row.status == 1 ? 'success' : 'danger'">
@@ -53,13 +42,16 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button :type="scope.row.status == 1 ? 'danger' : 'success'" size="small" @click="forbidden(scope.row)">{{scope.row.status == 1 ? '禁用' : '启用'}}</el-button>
             <!-- <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>
   
-      <!-- 分页 -->
-      <div class="pagination-container">
+     
+
+       <!-- 分页 -->
+       <div class="pagination-container">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
@@ -100,17 +92,7 @@
             <el-input v-model="userForm.roleName" placeholder="" />
           </el-form-item>
   
-          <!-- <el-form-item label="手机号" prop="id">
-            <el-input v-model="userForm.phoneNum" placeholder="" />
-          </el-form-item>
-  
-          <el-form-item label="初始密码" prop="id">
-            <el-input v-model="userForm.password" placeholder="" />
-          </el-form-item> -->
-  
-          <!-- <el-form-item label="手机号" prop="phone">
-            <el-input v-model="userForm.phone" placeholder="请输入手机号" />
-          </el-form-item> -->
+      
           <el-form-item label="权限" prop="type" style="width:250px">
             <el-select v-model="userForm.roleId" placeholder="请选择权限" multiple>
               <el-option 
@@ -181,6 +163,7 @@
         id: '',
         roleId: '',
         realName: '',
+        roleName: '',
         phoneNum: '',
         password: '',
         status: 1,
@@ -198,6 +181,14 @@
         role: [{ required: true, message: '请选择角色', trigger: 'change' }]
       }
   
+      const forbidden = (row)=>{
+        service.post('/role/enable', {
+          id: row.id,
+          status: row.status === 1 ? 0 : 1
+        }).then(res=>{
+           getUserList();
+        })
+    }
       // 获取用户列表
       const getUserList = async () => {
         loading.value = true
@@ -247,19 +238,57 @@
       
       }
   
+
+      const handleEdit = async (row) => {
+  try {
+    dialogTitle.value = '编辑角色';
+    
+    // 使用更安全的方式复制属性
+   // 不要重新赋值，而是修改属性
+Object.assign(userForm, {
+  ...row,
+  type: Number(row.type) || 0,
+  status: Number(row.status) || 0,
+  requestType: 2
+});
+    
+    dialogVisible.value = true;
+    
+    // 更安全的API调用方式
+    const res = await service.get('/role/show', {
+      params: { roleId: row.id }
+    });
+    
+    // 更健壮的数据处理
+    userForm.roleId = Array.isArray(res?.data) 
+      ? res.data.map(r => r.id) 
+      : [];
+      
+  } catch (error) {
+    console.error('编辑角色失败:', error);
+    // 可以添加用户提示，如:
+    // ElMessage.error('获取角色信息失败');
+  }
+}
       // 编辑用户
-      const handleEdit = (row) => {
-        dialogTitle.value = '编辑角色';
-        Object.assign(userForm, row);
-        userForm.type = parseInt(row.type); // 确保类型为数字
-        userForm.status = parseInt(row.status); // 确保状态为数字
-        dialogVisible.value = true;
-        userForm.requestType = 2;
-      }
+      // const handleEdit = async (row) => {
+      //   dialogTitle.value = '编辑角色';
+      //   Object.assign(userForm, row);
+      //   userForm.type = parseInt(row.type); // 确保类型为数字
+      //   userForm.status = parseInt(row.status); // 确保状态为数字
+      //   dialogVisible.value = true;
+      //   // 调用回显
+      //   const res = await service.get('/role/show?roleId='+row.id)
+      //   let ids = res.data.map(r=>r.id)
+      //   userForm.roleId = ids
+        
+      //   userForm.requestType = 2;
+       
+      // }
   
       // 删除用户
       const handleDelete = (row) => {
-        ElMessageBox.confirm('确认删除该用户吗？', '提示', {
+        ElMessageBox.confirm('确认删除该角色吗？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -269,7 +298,7 @@
             ElMessage.success('删除成功')
             getUserList()
           } catch (error) {
-            console.error('删除用户失败:', error)
+            console.error('删除角色失败:', error)
             ElMessage.error('删除用户失败')
           }
         })
@@ -280,24 +309,23 @@
         if (!userFormRef.value) return
         await userFormRef.value.validate(async (valid) => {
           if (valid) {
-            userForm.roleIds = [userForm.roleId]
-            await service.post('/admin/user/add', userForm)
-            ElMessage.success('成功')
-            
-            // try {
-            //   if (userForm.id) {
-            //     await service.post(`/admin/user/update_user`, userForm)
-            //     ElMessage.success('更新成功')
-            //   } else {
-            //     await service.post('/admin/user', userForm)
-            //     ElMessage.success('添加成功')
-            //   }
-            //   dialogVisible.value = false
-            //   getUserList()
-            // } catch (error) {
-            //   console.error('保存用户失败:', error)
-            //   ElMessage.error('保存失败')
-            // }
+            userForm.permissionIds = userForm.roleId
+            if(userForm.requestType == 1){
+              const res = await service.post('/role/add', userForm)
+              if(res.code == 2000){
+                ElMessage.success('新增成功')
+              }
+            }
+            if(userForm.requestType == 2){
+              const res = await service.post('/role/edit', userForm)
+              if(res.code === 2000){
+                ElMessage.success('修改成功')
+              }
+              
+            }
+           
+            dialogVisible.value = false;
+          
           }
         })
       }
@@ -357,6 +385,7 @@
         searchForm,
         roleOptions,
         loading,
+        forbidden,
         userList,
         currentPage,
         pageSize,
@@ -407,4 +436,29 @@
     display: flex;
     justify-content: flex-end;
   }
+
+  .user-container {
+  padding: 20px;
+}
+
+.operation-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.search-form {
+  flex: 1;
+}
+
+.operation-buttons {
+  margin-left: 20px;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
   </style>

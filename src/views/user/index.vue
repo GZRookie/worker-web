@@ -44,15 +44,10 @@
     <el-table :data="userList" style="width: 100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="phoneNum" label="手机号" width="250"  />
-      <el-table-column prop="realName" label="名称" width="250" />
+      <el-table-column prop="realName" label="用户名" width="250" />
       <el-table-column prop="roleNames" label="角色" />
-      <!-- <el-table-column label="角色" width="100">
-        <template #default="scope">
-          <el-tag :type="scope.row.type === 1 ? 'success' : 'info'">
-            {{ scope.row.type === 1 ? '管理员' : '普通用户' }}
-          </el-tag>
-        </template>
-      </el-table-column> -->
+      <el-table-column prop="password" label="密码" />
+      
       <el-table-column prop="status" label="状态" width="100">
         <template #default="scope">
           <el-tag :type="scope.row.status == 1 ? 'success' : 'danger'">
@@ -64,6 +59,7 @@
       <el-table-column label="操作" width="200" fixed="right">
         <template #default="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="error" size="small" @click="forbidden(scope.row)">禁用</el-button>
           <!-- <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button> -->
         </template>
       </el-table-column>
@@ -120,7 +116,7 @@
           <el-input v-model="userForm.phoneNum" placeholder="" />
         </el-form-item>
 
-        <el-form-item label="初始密码" prop="id">
+        <el-form-item label="密码" prop="id">
           <el-input v-model="userForm.password" placeholder="" />
         </el-form-item>
 
@@ -181,6 +177,7 @@ export default {
       status: null
     })
     const roleOptions = ref([])
+    const allOptions = ref([])
 
     // 表格数据
     const loading = ref(false)
@@ -214,6 +211,8 @@ export default {
       role: [{ required: true, message: '请选择角色', trigger: 'change' }]
     }
 
+    
+
     // 获取用户列表
     const getUserList = async () => {
       loading.value = true
@@ -221,6 +220,7 @@ export default {
         const res = await service.post('/admin/user/page', {
             offset: currentPage.value,
             limit: pageSize.value,
+            realName: searchForm.searchKey,
             ...searchForm
           }
          
@@ -235,6 +235,15 @@ export default {
       }
     }
 
+    const forbidden = (row)=>{
+        service.post('/admin/user/enable', {
+          id: row.id,
+          status: row.status === 1 ? 0 : 1
+        }).then(res=>{
+           getUserList();
+        })
+    }
+
     // 搜索
     const handleSearch = () => {
       currentPage.value = 1
@@ -245,6 +254,7 @@ export default {
     const resetSearch = () => {
       searchForm.username = ''
       searchForm.keyWords = ''
+      searchForm.searchKey = ''
       searchForm.status = null
       searchForm.roleId = null
       handleSearch()
@@ -258,6 +268,7 @@ export default {
       dialogVisible.value = true
       resetForm()
       userForm.requestType = 1
+      roleOptions.value = allOptions.value.filter(role=>role.isWorker == false)
     
     }
 
@@ -269,6 +280,7 @@ export default {
       userForm.status = parseInt(row.status); // 确保状态为数字
       dialogVisible.value = true;
       userForm.requestType = 2;
+      roleOptions.value = allOptions.value;
     }
 
     // 删除用户
@@ -295,10 +307,19 @@ export default {
       await userFormRef.value.validate(async (valid) => {
         if (valid) {
           userForm.roleIds = [userForm.roleId]
-          await service.post('/admin/user/add', userForm)
-          ElMessage.success('成功')
+          if(userForm.requestType == 1){
+            await service.post('/admin/user/add', userForm)
+            ElMessage.success('新增成功')
+          }
+          if(userForm.requestType == 2){
+            const res = await service.post('/admin/user/edit', userForm)
+
+            if(res.code == 2000){
+              ElMessage.success('编辑成功')
+            }
+          }
           dialogVisible.value = false
-      
+          getUserList();
         }
       })
     }
@@ -332,7 +353,8 @@ export default {
     const getRoleList = () => {
       service.get('/role/list').then(res => {
          let cres= res.data || [];
-         roleOptions.value = cres.filter(i=>i.isWorker==false)
+         roleOptions.value = cres;
+         allOptions.value= cres;
       }).catch(err => {
         console.error('获取角色列表失败：', err)
         ElMessage.error('获取角色列表失败')
@@ -363,6 +385,8 @@ export default {
       resetSearch,
       handleAdd,
       handleEdit,
+      getUserList,
+      forbidden,
       handleDelete,
       submitForm,
       handleSizeChange,
