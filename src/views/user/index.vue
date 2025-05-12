@@ -58,9 +58,10 @@
       <el-table-column prop="createdTime" label="创建时间" width="300" />
       <el-table-column label="操作" width="200" fixed="right">
         <template #default="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button type="error" size="small" @click="forbidden(scope.row)">禁用</el-button>
-          <!-- <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button> -->
+          <el-button v-if="!scope.row.isWorker" type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button v-if="!scope.row.isWorker" type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button v-if="!scope.row.isWorker" :type="scope.row.status == 1 ? 'danger' : 'success'" size="small" @click="forbidden(scope.row)">{{scope.row.status == 1 ? '禁用' : '启用'}}</el-button>
+          
         </template>
       </el-table-column>
     </el-table>
@@ -291,8 +292,13 @@ export default {
         type: 'warning'
       }).then(async () => {
         try {
-          await service.delete(`/admin/user/${row.id}`)
-          ElMessage.success('删除成功')
+          const res = await service.post(`/admin/user/delete`, {
+            ids: [row.id],
+            delete: 1
+          })
+          if(res.code == 2000){
+            ElMessage.success('删除成功')
+          }
           getUserList()
         } catch (error) {
           console.error('删除用户失败:', error)

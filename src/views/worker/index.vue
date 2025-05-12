@@ -55,7 +55,7 @@
           <el-button type="success" size="small" @click="handleCheck(scope.row,1)">上班打卡</el-button>
           <el-button type="success" size="small" @click="handleCheck(scope.row,2)">下班打卡</el-button>
           <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-          <!-- <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button> -->
+          <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
           <el-button :type="scope.row.status == 1 ? 'danger' : 'success'" size="small" @click="forbidden(scope.row)">{{scope.row.status == 1 ? '禁用' : '启用'}}</el-button>
         </template>
 
@@ -481,17 +481,18 @@
       
       // 删除按钮点击事件
       const handleDelete = (row) => {
-        ElMessageBox.confirm(`确认要删除「${row.title}」吗？`, '警告', {
+        ElMessageBox.confirm(`确认要删除吗？`, '警告', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           // 模拟删除请求
-          service.delete("/admin/discuss/delete/"+ row.id).then((res) => {
-            if(res.code === 200) {
+          service.get("/worker/info/delete/"+ row.id).then((res) => {
+            if(res.code === 2000) {
               ElMessage.success('删除成功')
-              getInitList()
+              
             }
+            getInitList()
           })
         }).catch(() => {
           ElMessage.info('已取消删除')

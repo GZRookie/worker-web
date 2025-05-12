@@ -39,10 +39,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="createdTime" label="创建时间" width="300" align="center" />
-        <el-table-column label="操作" width="200" fixed="right" align="center">
+        <el-table-column  label="操作" width="200" fixed="right" align="center">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button :type="scope.row.status == 1 ? 'danger' : 'success'" size="small" @click="forbidden(scope.row)">{{scope.row.status == 1 ? '禁用' : '启用'}}</el-button>
+            <el-button v-if="!scope.row.isWorker" type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button v-if="!scope.row.isWorker" type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button v-if="!scope.row.isWorker" :type="scope.row.status == 1 ? 'danger' : 'success'" size="small" @click="forbidden(scope.row)">{{scope.row.status == 1 ? '禁用' : '启用'}}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -293,8 +294,14 @@ Object.assign(userForm, {
           type: 'warning'
         }).then(async () => {
           try {
-            await service.delete(`/admin/user/${row.id}`)
-            ElMessage.success('删除成功')
+            const res = await service.post(`/role/delete`, {
+              ids: [row.id],
+              delete : 1
+            })
+            if(res.code == 2000){
+              ElMessage.success('删除成功')
+            }
+            
             getUserList()
           } catch (error) {
             console.error('删除角色失败:', error)
