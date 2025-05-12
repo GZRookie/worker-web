@@ -54,6 +54,7 @@
         <template #default="scope">
           <el-button type="success" size="small" @click="handleCheck(scope.row,1)">上班打卡</el-button>
           <el-button type="success" size="small" @click="handleCheck(scope.row,2)">下班打卡</el-button>
+          <el-button type="success" size="small" @click="qingjia(scope.row)">请假</el-button>
           <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
           <el-button :type="scope.row.status == 1 ? 'danger' : 'success'" size="small" @click="forbidden(scope.row)">{{scope.row.status == 1 ? '禁用' : '启用'}}</el-button>
@@ -176,6 +177,63 @@
           <el-button type="primary" :loading="submitLoading" @click="submitForm">确定</el-button>
         </template>
       </el-dialog>
+
+      <!-- 请假对话框 -->
+      <el-dialog
+        title="申请请假"
+        v-model="leaveDialogVisible"
+        width="500px"
+        @close="leaveDialogVisible = false"
+      >
+        <el-form
+          ref="leaveFormRef"
+          :model="leaveForm"
+          :rules="leaveRules"
+          label-width="100px"
+        >
+          <el-form-item label="工人姓名" prop="workerName">
+            <el-input v-model="leaveForm.workerName" disabled />
+          </el-form-item>
+          <el-form-item label="请假类型" prop="leaveType">
+            <el-select v-model="leaveForm.leaveType" placeholder="请选择请假类型">
+              <el-option :label="'事假'" :value="1" />
+              <el-option :label="'病假'" :value="2" />
+              <el-option :label="'年假'" :value="3" />
+              <el-option :label="'其他'" :value="4" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="开始时间" prop="startTime">
+            <el-date-picker
+              v-model="leaveForm.startTime"
+              type="datetime"
+              placeholder="请选择开始时间"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm:ss"
+            />
+          </el-form-item>
+          <el-form-item label="结束时间" prop="endTime">
+            <el-date-picker
+              v-model="leaveForm.endTime"
+              type="datetime"
+              placeholder="请选择结束时间"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm:ss"
+            />
+          </el-form-item>
+          <el-form-item label="请假原因" prop="reason">
+            <el-input
+              v-model="leaveForm.reason"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入请假原因"
+            />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="leaveDialogVisible = false">取消</el-button>
+          <el-button type="primary" :loading="leaveSubmitLoading" @click="submitLeave">提交</el-button>
+        </template>
+      </el-dialog>
     </div>
   </template>
   
@@ -189,11 +247,14 @@
     name: 'CategoryManagement',
     setup() {
       const formRef = ref(null)
+      const leaveFormRef = ref(null)
       const loading = ref(false)
       const submitLoading = ref(false)
       const importLoading = ref(false)
+      const leaveSubmitLoading = ref(false)
       const dialogVisible = ref(false)
       const importDialogVisible = ref(false)
+      const leaveDialogVisible = ref(false)
       const dialogType = ref('add')
       const roleOptions = ref([])
       const importFile = ref(null)
@@ -223,6 +284,17 @@
           emergencyContact: ''
         },
         
+        // 请假表单数据
+        leaveForm: {
+          id: null,
+          workerId: null,
+          workerName: '',
+          leaveType: 1,
+          startTime: '',
+          endTime: '',
+          reason: ''
+        },
+        
         // 表单校验规则
         rules: {
           name: [
@@ -238,6 +310,23 @@
           idCard: [
             { required: true, message: '请输入身份证号', trigger: 'blur' }
           ]
+        },
+        
+        // 请假表单校验规则
+        leaveRules: {
+          leaveType: [
+            { required: true, message: '请选择请假类型', trigger: 'change' }
+          ],
+          startTime: [
+            { required: true, message: '请选择开始时间', trigger: 'change' }
+          ],
+          endTime: [
+            { required: true, message: '请选择结束时间', trigger: 'change' }
+          ],
+          reason: [
+            { required: true, message: '请输入请假原因', trigger: 'blur' },
+            { min: 2, max: 200, message: '长度在 2 到 200 个字符', trigger: 'blur' }
+          ]
         }
       })
       
@@ -246,6 +335,57 @@
         
       }
 
+      // 请假按钮点击事件
+      const qingjia = (row)=>{
+        leaveDialogVisible.value = true
+        // 填充工人信息
+        state.leaveForm = {
+          id: null,
+          workerId: row.id,
+          workerName: row.name,
+          leaveType: 1,
+          startTime: '',
+          endTime: '',
+          reason: ''
+        }
+      }
+      
+      // 提交请假申请
+      const submitLeave = () => {
+        leaveFormRef.value.validate((valid) => {
+          if (valid) {
+            leaveSubmitLoading.value = true
+            
+            // 准备提交数据
+            const submitData = {
+              workerId: state.leaveForm.workerId,
+              leaveType: state.leaveForm.leaveType,
+              startTime: state.leaveForm.startTime,
+              endTime: state.leaveForm.endTime,
+              reason: state.leaveForm.reason
+            }
+            
+            // 如果是编辑状态，添加id字段
+            if (state.leaveForm.id) {
+              submitData.id = state.leaveForm.id
+            }
+            
+            service.post('/attendance/leave/apply', submitData).then((res) => {
+              if(res.code === 2000) {
+                ElMessage.success('请假申请提交成功')
+                leaveDialogVisible.value = false
+                getInitList() // 刷新列表
+              } else {
+                ElMessage.error(res.message || '请假申请提交失败')
+              }
+              leaveSubmitLoading.value = false
+            }).catch(() => {
+              leaveSubmitLoading.value = false
+              ElMessage.error('系统错误，请稍后再试')
+            })
+          }
+        })
+      }
 
       const handleCheck = (row, type)=>{
         console.log("daka")
@@ -552,6 +692,11 @@
         importFile,
         importDialogVisible,
         importLoading,
+        leaveFormRef,
+        leaveDialogVisible,
+        leaveSubmitLoading,
+        submitLeave,
+        qingjia,
         handleStatusChange,
         handleDelete,
         ...toRefs(state)
