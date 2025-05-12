@@ -290,20 +290,25 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(async () => {
+      }).then( () => {
         try {
-          const res = await service.post(`/admin/user/delete`, {
+          service.post(`/admin/user/delete`, {
             ids: [row.id],
             delete: 1
-          })
-          if(res.code == 2000){
+          }).then(res=>{
+            if(res.code == 2000){
             ElMessage.success('删除成功')
+            getUserList()
           }
-          getUserList()
+          })
+          
+          
         } catch (error) {
           console.error('删除用户失败:', error)
           ElMessage.error('删除用户失败')
         }
+      }).catch(err=>{
+
       })
     }
 
