@@ -27,25 +27,22 @@
       </div>
   
       <!-- 用户列表 -->
-      <el-table :data="userList" style="width: 100%" v-loading="loading">
-        <el-table-column prop="num" label="序号" width="80" />
-        <!-- <el-table-column prop="phoneNum" label="角色" width="250"  />
-        <el-table-column prop="realName" label="名称" width="250" /> -->
-        <el-table-column prop="roleName" label="角色" width="250"  />
+      <el-table :data="userList" style="width: 100%; height: calc(100vh - 180px);" v-loading="loading" border>
+        <el-table-column prop="num" label="序号" width="80" align="center" />
+        <el-table-column prop="roleName" label="角色" width="250" align="center" />
       
-        <el-table-column prop="status" label="状态" width="400">
+        <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="scope">
             <el-tag :type="scope.row.status == 1 ? 'success' : 'danger'">
               {{ scope.row.status == 1 ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createdTime" label="创建时间" width="300" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column prop="createdTime" label="创建时间" width="300" align="center" />
+        <el-table-column label="操作" width="200" fixed="right" align="center">
           <template #default="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
             <el-button :type="scope.row.status == 1 ? 'danger' : 'success'" size="small" @click="forbidden(scope.row)">{{scope.row.status == 1 ? '禁用' : '启用'}}</el-button>
-            <!-- <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>
@@ -439,28 +436,25 @@ Object.assign(userForm, {
     justify-content: flex-end;
   }
 
-  .user-container {
-  padding: 20px;
-}
+  /* 添加以下样式使表格内容居中 */
+  :deep(.el-table) {
+    width: 100%;
+    height: calc(100vh - 180px);
+  }
 
-.operation-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
+  :deep(.el-table__body) {
+    width: 100% !important;
+  }
 
-.search-form {
-  flex: 1;
-}
+  :deep(.el-table__header) {
+    width: 100% !important;
+  }
 
-.operation-buttons {
-  margin-left: 20px;
-}
+  :deep(.el-table .cell) {
+    text-align: center;
+  }
 
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
+  :deep(.el-table th) {
+    text-align: center;
+  }
   </style>

@@ -14,18 +14,18 @@
     </div>
 
     <!-- 工资记录列表 -->
-    <el-table :data="salaryList" style="width: 100%" v-loading="loading">
-      <el-table-column prop="num" label="序号" width="80" />
-      <el-table-column prop="workerName" label="工人姓名" width="120" />
-      <el-table-column prop="workerNo" label="工号" width="120" />
-      <el-table-column prop="roleName" label="工种" width="120" />
-      <el-table-column prop="dailyWage" label="日薪(元)" width="120">
+    <el-table :data="salaryList" style="width: 100%; height: calc(100vh - 180px);" v-loading="loading" border>
+      <el-table-column prop="num" label="序号" width="80" align="center" />
+      <el-table-column prop="workerName" label="工人姓名" width="120" align="center" />
+      <el-table-column prop="workerNo" label="工号" width="120" align="center" />
+      <el-table-column prop="roleName" label="工种" width="120" align="center" />
+      <el-table-column prop="dailyWage" label="日薪(元)" width="120" align="center">
         <template #default="scope">
           {{ scope.row.dailyWage.toFixed(2) }}
         </template>
       </el-table-column>
-      <el-table-column prop="workDays" label="工作天数" width="120" />
-      <el-table-column prop="totalSalary" label="总工资(元)" width="150">
+      <el-table-column prop="workDays" label="工作天数" width="120" align="center" />
+      <el-table-column prop="totalSalary" label="总工资(元)" width="150" align="center">
         <template #default="scope">
           {{ scope.row.totalSalary.toFixed(2) }}
         </template>
@@ -297,7 +297,20 @@ export default {
   margin: 0 5px;
 }
 
-/* 移除表格高度限制，使其与用户管理页面一致 */
+/* 添加表格高度限制，使其占满全屏 */
+:deep(.el-table) {
+  width: 100%;
+  height: calc(100vh - 180px);
+}
+
+:deep(.el-table__body) {
+  width: 100% !important;
+}
+
+:deep(.el-table__header) {
+  width: 100% !important;
+}
+
 :deep(.el-table .cell) {
   text-align: center;
 }

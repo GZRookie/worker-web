@@ -30,27 +30,27 @@
       </div>
     </div>
     <!-- 工人列表 -->
-    <el-table :data="categoryList" style="width: 100%" v-loading="loading">
-      <el-table-column prop="num" label="ID" width="80" />
-      <el-table-column prop="name" label="姓名" width="120" />
-      <el-table-column prop="gender" label="性别" width="80">
+    <el-table :data="categoryList" style="width: 100%; height: calc(100vh - 180px);" v-loading="loading" border>
+      <el-table-column prop="num" label="序号" width="80" align="center" />
+      <el-table-column prop="name" label="姓名" width="120" align="center" />
+      <el-table-column prop="gender" label="性别" width="80" align="center">
         <template #default="scope">
           {{ scope.row.gender === 1 ? '男' : scope.row.gender === 0 ? '女' : '其他' }}
         </template>
       </el-table-column>
-      <el-table-column prop="roleName" label="工种" width="120" />
-      <el-table-column prop="phoneNum" label="电话号码" width="120" />
-      <el-table-column prop="workerNo" label="工号" width="120" />
-      <el-table-column prop="idCard" label="身份证号" width="180" />
-      <el-table-column prop="emergencyContact" label="紧急联系人" width="120" />
-      <el-table-column prop="status" label="状态" width="400">
+      <el-table-column prop="roleName" label="工种" width="120" align="center" />
+      <el-table-column prop="phoneNum" label="电话号码" width="120" align="center" />
+      <el-table-column prop="workerNo" label="工号" width="120" align="center" />
+      <el-table-column prop="idCard" label="身份证号" width="180" align="center" />
+      <el-table-column prop="emergencyContact" label="紧急联系人" width="120" align="center" />
+      <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="scope">
             <el-tag :type="scope.row.status == 1 ? 'success' : 'danger'">
               {{ scope.row.status == 1 ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-      <el-table-column label="操作" width="500" fixed="right">
+      <el-table-column label="操作" width="500" fixed="right" align="center">
         <template #default="scope">
           <el-button type="success" size="small" @click="handleCheck(scope.row,1)">上班打卡</el-button>
           <el-button type="success" size="small" @click="handleCheck(scope.row,2)">下班打卡</el-button>
@@ -233,12 +233,10 @@
             { required: true, message: '请选择角色', trigger: 'change' }
           ],
           phoneNum: [
-            { required: true, message: '请输入电话号码', trigger: 'blur' },
-            { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+            { required: true, message: '请输入电话号码', trigger: 'blur' }
           ],
           idCard: [
-            { required: true, message: '请输入身份证号', trigger: 'blur' },
-            { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '请输入正确的身份证号码', trigger: 'blur' }
+            { required: true, message: '请输入身份证号', trigger: 'blur' }
           ]
         }
       })
@@ -585,6 +583,28 @@
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+/* 添加以下样式使表格内容居中 */
+:deep(.el-table) {
+  width: 100%;
+  height: calc(100vh - 180px);
+}
+
+:deep(.el-table__body) {
+  width: 100% !important;
+}
+
+:deep(.el-table__header) {
+  width: 100% !important;
+}
+
+:deep(.el-table .cell) {
+  text-align: center;
+}
+
+:deep(.el-table th) {
+  text-align: center;
 }
 </style>
 
